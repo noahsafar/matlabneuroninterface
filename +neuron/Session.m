@@ -146,12 +146,28 @@ classdef Session < dynamicprops
         %   n = neuron.launch();
         %   n.t, n.dt, n.GAMMA, n.PHI, etc.
             try
-                [varargout{1:nargout}] = self.dynamic_call(S);
+                if strcmp(S(1).type, '()')
+                    % Allow n('create soma') to call n.hoc('create soma')
+                    [varargout{1:nargout}] = self.hoc(S(1).subs{:});
+                    % Handle chained calls if present
+                    if numel(S) > 1
+                        [varargout{1:nargout}] = neuron.chained_method(varargout, S, 1);
+                    end
+                else
+                    [varargout{1:nargout}] = self.dynamic_call(S);
+                end
             catch  
                 % Check again if var/func exists; available functions can
                 % change due to importing .hoc files, for example.
                 self.fill_dynamic_props();
-                [varargout{1:nargout}] = self.dynamic_call(S);
+                if strcmp(S(1).type, '()')
+                    [varargout{1:nargout}] = self.hoc(S(1).subs{:});
+                    if numel(S) > 1
+                        [varargout{1:nargout}] = neuron.chained_method(varargout, S, 1);
+                    end
+                else
+                    [varargout{1:nargout}] = self.dynamic_call(S);
+                end
             end
         end
         function list_functions(self)
@@ -273,9 +289,9 @@ classdef Session < dynamicprops
             end
 
         end
-        function value = hoc_oc(str)
-        % Pass string to hoc_oc.
-        %   hoc_oc()
+        function value = hoc(str)
+        % Pass string to hoc.
+        %   hoc()
             neuron_api('nrn_hoc_call', str);
             value = true;
         end
@@ -288,6 +304,15 @@ classdef Session < dynamicprops
         % Reset topology.
         %   reset_sections()
             neuron_api('nrn_hoc_call', 'forall delete_section()');
+        end
+        function sec = cas()
+        % Return the currently accessed section as a neuron.Section object.
+            sec_ptr = neuron_api('nrn_cas');
+            if isempty(sec_ptr) || sec_ptr == 0 || sec_ptr == clib.type.nullptr
+                warning("No section currently accessed.");
+            else
+                sec = neuron.Section(sec_ptr);
+            end
         end
         function all_sections = allsec(section_list, owner)
         % Return cell array containing all sections, or all sections in a NEURON
