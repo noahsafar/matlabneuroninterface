@@ -801,12 +801,8 @@ void nrn_property_get(const mxArray* prhs[], mxArray* plhs[]) {
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* obj = reinterpret_cast<Object*>(obj_ptr);
     auto [name] = extractParams<std::string>(prhs, 2);
-    mexPrintf("obj_ptr: %llu\n", obj_ptr);
-    mexPrintf("obj: %p\n", obj);
-    mexPrintf("nrn_property_get: %s\n", name.c_str());
     const char* obj_name = nrn_class_name_(obj);
-    mexPrintf("Object class name: %s\n", obj_name);
-    double result = nrn_property_get_(obj, name.c_str()); // This is where it ERRORS
+    double result = nrn_property_get_(obj, name.c_str());
     plhs[0] = mxCreateDoubleScalar(result);
 }
 
@@ -1102,7 +1098,6 @@ void nrnref_get_name(const mxArray* prhs[], mxArray* plhs[]) {
         // For Vectors, call label function to get the name
         nrn_method_call_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0);
         char** result = nrn_pop_str_();
-        mexPrintf("nrnref_get_name: result: %s\n", *result);
         plhs[0] = mxCreateString(*result);
     }
     else {
