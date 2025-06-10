@@ -72,7 +72,6 @@ void (*nrn_object_unref_)(Object*) = nullptr;
 char const* (*nrn_class_name_)(const Object*) = nullptr;
 Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
 void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
-int (*nrn_object_index_)(Object*) = nullptr;
 bool (*nrn_prop_exists_)(const Object*) = nullptr;
 
 double* (*nrn_vector_data_)(Object*) = nullptr;
@@ -1235,13 +1234,6 @@ void nrn_get_plotshape_varname(const mxArray* prhs[], mxArray* plhs[]) {
     plhs[0] = mxCreateString(varname);
 }
 
-void nrn_object_index(const mxArray* prhs[], mxArray* plhs[]) {
-    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    Object* obj = reinterpret_cast<Object*>(obj_ptr);
-    int index = nrn_object_index_(obj);
-    plhs[0] = mxCreateDoubleScalar(static_cast<double>(index));
-}
-
 void nrn_symbol_array_length(const mxArray* prhs[], mxArray* plhs[]) {
     auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
@@ -1612,8 +1604,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_symbol_type"] = nrn_symbol_type;
         function_map["nrn_symbol"] = nrn_symbol;
         function_map["nrn_get_plotshape_varname"] = nrn_get_plotshape_varname;
-        nrn_object_index_ = (int (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_object_index");
-        function_map["nrn_object_index"] = nrn_object_index;
         nrn_symbol_array_length_ = (int (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_array_length");
         function_map["nrn_symbol_array_length"] = nrn_symbol_array_length;
         nrn_section_Ra_get_ = (double (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_Ra_get");
