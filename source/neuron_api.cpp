@@ -73,6 +73,7 @@ char const* (*nrn_class_name_)(const Object*) = nullptr;
 Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
 void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
 int (*nrn_object_index_)(Object*) = nullptr;
+bool (*nrn_prop_exists_)(const Object*) = nullptr;
 
 double* (*nrn_vector_data_)(Object*) = nullptr;
 
@@ -1435,6 +1436,12 @@ void nrn_sectionlist_iterator_done(const mxArray* prhs[], mxArray* plhs[]) {
     plhs[0] = mxCreateLogicalScalar(done != 0);
 }
 
+void nrn_prop_exists(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    const Object* obj = reinterpret_cast<const Object*>(obj_ptr);
+    bool result = nrn_prop_exists_(obj);
+    plhs[0] = mxCreateLogicalScalar(result);
+}
 
 
 
@@ -1662,7 +1669,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_sectionlist_iterator_new"] = nrn_sectionlist_iterator_new;
         function_map["nrn_sectionlist_iterator_next"] = nrn_sectionlist_iterator_next;
         function_map["nrn_sectionlist_iterator_done"] = nrn_sectionlist_iterator_done;
+        nrn_prop_exists_ = (bool (*)(const Object*)) DLL_GET_PROC(neuron_handle, "nrn_prop_exists");
+        function_map["nrn_prop_exists"] = nrn_prop_exists;
        
+
         // Clean up
         //DLL_FREE(wrapper_handle);
         //DLL_FREE(neuron_handle);

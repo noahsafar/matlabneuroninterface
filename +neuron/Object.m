@@ -208,24 +208,28 @@ classdef Object < dynamicprops
         function set_pp_prop(self, propname, value)
         % Set dynamic property.
         %   set_pp_prop(propname, value)
-            disp("set_pp_prop");
+            if ~(neuron_api('nrn_prop_exists', self.obj))
+                error("The property '%s' does not exist", propname);
+            end
             neuron_api('nrn_property_set', self.obj, propname, value);
         end
 
         function value = get_pp_prop(self, propname)
         % Get dynamic property.
         %   value = get_pp_prop(propname)
-            disp("get_pp_prop");
-            disp(self.obj); % gives valid obj ptr
-            disp(propname); % also valid
+            if ~(neuron_api('nrn_prop_exists', self.obj))
+                error("The property '%s' does not exist", propname);
+            end
             value = neuron_api('nrn_property_get', self.obj, propname); % THIS IS WHERE IT ERRORS
-            disp("got_pp_prop");
         end
 
         function value = get_pp_arr(self, propname)
         % Get dynamic property array.
         %   value = get_pp_arr(propname)
             disp("get_pp_arr");
+            if ~(neuron_api('nrn_prop_exists', self.obj))
+                error("The property '%s' does not exist", propname);
+            end
             n = self.attr_array_map(propname);
             value = zeros(1, n);
             for i=1:n
@@ -237,6 +241,9 @@ classdef Object < dynamicprops
         % Set dynamic property array.
         %   set_pp_arr(propname, value)
             disp("set_pp_arr");
+            if ~(neuron_api('nrn_prop_exists', self.obj))
+                error("The property '%s' does not exist", propname);
+            end
             n = self.attr_array_map(propname);
             assert(length(value) == n);
             for i=1:n
@@ -248,6 +255,9 @@ classdef Object < dynamicprops
         % Set dynamic property array element.
         %   set_pp_arr_element(propname, value, index)
             disp("set_pp_arr_element");
+            if ~(neuron_api('nrn_prop_exists', self.obj))
+                error("The property '%s' does not exist", propname);
+            end
             neuron_api('nrn_property_array_set', self.obj, propname, value, i-1);
         end
 
@@ -255,6 +265,9 @@ classdef Object < dynamicprops
         % Set dynamic property.
         %   set_prop(propname, value)
             disp("set_steered_prop");
+            if ~(neuron_api('nrn_prop_exists', self.obj))
+                error("The property '%s' does not exist", propname);
+            end
             neuron_api('nrn_property_set', self.obj, propname, value);
         end
 
@@ -262,6 +275,9 @@ classdef Object < dynamicprops
         % Get dynamic property.
         %   value = get_prop(propname)
             disp("get_steered_prop");
+            if ~(neuron_api('nrn_prop_exists', self.obj))
+                error("The property '%s' does not exist", propname);
+            end
             value = neuron_api('nrn_property_get', self.obj, propname);
         end
 
